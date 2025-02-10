@@ -79,7 +79,23 @@ class Scanner {
             case '/':
                 if (match('/')) {
                     while(peek() != '\n' && !isAtEnd()) advance();
-                } else {
+                } else if (match('*')) {
+                    int count = 1;
+                    while (!isAtEnd()) {
+                        if (match('\n')) line++;
+                        else if (match('/') && peek() == '*') {
+                            count++;
+                            advance();
+                        }
+                        else if (match('*') && peek() == '/') {
+                            count--;
+                            advance();
+                            if (count == 0) break;
+                        } else advance();
+                    }
+                    if (isAtEnd() && count != 0) RiLox.error(line, "Unterminated comment found");
+                }
+                else {
                     addToken(SLASH);
                 }
                 break;
@@ -92,7 +108,6 @@ class Scanner {
             case '\n':
                 line++;
                 break;
-
             case '"':
                 string();
                 break;
